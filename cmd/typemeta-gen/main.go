@@ -107,16 +107,19 @@ func GenerateMetadata(root string) error {
 					for _, comment := range gen.Doc.List {
 						line := strings.TrimSpace(strings.TrimPrefix(comment.Text, "//"))
 						if strings.HasPrefix(line, "+typemeta:") {
-							parts := strings.SplitN(strings.TrimPrefix(line, "+typemeta:"), "=", 2)
-							if len(parts) == 2 {
-								key := strings.TrimSpace(parts[0])
-								value := strings.TrimSpace(parts[1])
-								fmt.Fprintf(buf, "\ttypemeta.Register[%s](\"%s\", \"%s\")\n", typeName, key, value)
-								codeAddedInDir[dir] = true
-							} else {
-								msg := fmt.Sprintf("your +typemeta: syntax is incorrect. You entered this: '// %s'. Valid Example: '// +typemeta:key=value'\n", line)
-								log.Print(msg)
-								return errors.New(msg)
+							keyValues := strings.TrimPrefix(line, "+typemeta:")
+							for _, keyValue := range strings.Split(keyValues, ",") {
+								parts := strings.SplitN(strings.TrimSpace(keyValue), "=", 2)
+								if len(parts) == 2 {
+									key := strings.TrimSpace(parts[0])
+									value := strings.TrimSpace(parts[1])
+									fmt.Fprintf(buf, "\ttypemeta.Register[%s](\"%s\", \"%s\")\n", typeName, key, value)
+									codeAddedInDir[dir] = true
+								} else {
+									msg := fmt.Sprintf("your +typemeta: syntax is incorrect. You entered this: '// %s'. Valid Example: '// +typemeta:key=value'\n", line)
+									log.Print(msg)
+									return errors.New(msg)
+								}
 							}
 						}
 					}

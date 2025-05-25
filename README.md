@@ -58,11 +58,11 @@ The package includes a code generator tool that can automatically register metad
 go install github.com/mike-jacks/typemeta/cmd/typemeta-gen@latest
 ```
 
-2. Add metadata comments to your structs:
+2. Add metadata comments to your structs. Key Values can be separated by a ',' on one line if you like:
 
 ```go
 // +typemeta:table=users
-// +typemeta:plural=users
+// +typemeta:plural=users,anotherKey=anotherValue
 type User struct {
     Name string
     Age  int
