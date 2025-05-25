@@ -106,6 +106,7 @@ This approach integrates well with Go's built-in code generation tools and can b
 - `Must[T any](key string) string`: Retrieve metadata, panics if not found
 - `MustWithLog[T any](key string) string`: Retrieve metadata with logging, panics if not found
 - `List() []Entry`: List all registered metadata entries
+- `ResetRegistry()`: Reset the typemeta registry to be empty
 
 ### Types
 
