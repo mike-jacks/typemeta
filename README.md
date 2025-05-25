@@ -4,6 +4,7 @@ A lightweight Go package for managing type-level metadata with a powerful code g
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/mike-jacks/typemeta.svg)](https://pkg.go.dev/github.com/mike-jacks/typemeta)
 [![Go Report Card](https://goreportcard.com/badge/github.com/mike-jacks/typemeta)](https://goreportcard.com/report/github.com/mike-jacks/typemeta)
+[![Coverage Status](https://coveralls.io/repos/github/mike-jacks/typemeta/badge.svg?branch=main)](https://coveralls.io/github/mike-jacks/typemeta?branch=main)
 
 ## Features
 
