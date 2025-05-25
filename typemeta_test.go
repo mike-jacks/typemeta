@@ -1,11 +1,11 @@
 package typemeta
 
 import (
+	"cmp"
 	"fmt"
 	"reflect"
 	"slices"
 	"testing"
-	"cmp"
 )
 
 func resetRegistry() {

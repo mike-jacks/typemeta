@@ -2,6 +2,8 @@
 
 A lightweight Go package for managing type-level metadata with a powerful code generation tool.
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/mike-jacks/typemeta.svg)](https://pkg.go.dev/github.com/mike-jacks/typemeta)
+
 ## Features
 
 - Type-safe metadata registration and retrieval
