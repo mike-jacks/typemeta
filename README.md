@@ -50,6 +50,8 @@ func main() {
 
 The package includes a code generator tool that can automatically register metadata based on struct comments.
 
+### Option 1: Direct Usage
+
 1. Install the generator:
 
 ```bash
@@ -72,6 +74,24 @@ type User struct {
 ```bash
 typemeta-gen -root=./your/project
 ```
+
+### Option 2: Using go:generate
+
+1. Create a `generator.go` file in your project root:
+
+```go
+package main
+
+//go:generate typemeta-gen -root=.
+```
+
+2. Run the generator using go generate:
+
+```bash
+go generate ./...
+```
+
+This approach integrates well with Go's built-in code generation tools and can be easily automated in your build process.
 
 ## API Reference
 
