@@ -69,3 +69,9 @@ func List() []Entry {
 	}
 	return result
 }
+
+func ResetRegistry() {
+	mu.Lock()
+	defer mu.Unlock()
+	registry = make(map[reflect.Type]map[string]string)
+}

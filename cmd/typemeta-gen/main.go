@@ -16,37 +16,41 @@ import (
 
 const MODULE_NAME = "github.com/mike-jacks/typemeta"
 
-var (
-	helpFlag    = flag.Bool("help", false, "Show help message. Default: 'false'")
-	rootDirFlag = flag.String("root", "", "Root directory to scan for Go files. Default: ''. (Required)")
-)
-
-func main() {
-	flag.Parse()
-
-	if *helpFlag {
+func run(helpFlag bool, rootDirFlag string) error {
+	if helpFlag {
 		printHelp()
-		return
+		return nil
 	}
 
-	if *rootDirFlag == "" {
+	if rootDirFlag == "" {
 		fmt.Println("Please provide a valid root to use")
 		fmt.Println()
 		flag.PrintDefaults()
-		return
+		return fmt.Errorf("missing root flag")
 	}
 
-	if _, err := os.Stat(*rootDirFlag); os.IsNotExist(err) {
-		fmt.Printf("Error: directory '%s' does not exist", *rootDirFlag)
-		os.Exit(1)
+	if _, err := os.Stat(rootDirFlag); os.IsNotExist(err) {
+		fmt.Printf("Error: directory '%s' does not exist", rootDirFlag)
+		return err
 	} else if err != nil {
-		fmt.Printf("Error accessing directory '%s': %v", *rootDirFlag, err)
-		os.Exit(1)
+		fmt.Printf("Error accessing directory '%s': %v", rootDirFlag, err)
+		return err
 	}
 
 	log.Println("Running typemeta-gen...")
-	if err := GenerateMetadata(*rootDirFlag); err != nil {
-		log.Fatal(err)
+	if err := GenerateMetadata(rootDirFlag); err != nil {
+		log.Print(err)
+		return err
+	}
+	return nil
+}
+
+func main() {
+	helpFlag := flag.Bool("help", false, "Show help message. Default: 'false'")
+	rootDirFlag := flag.String("root", "", "Root directory to scan for Go files. Default: ''. (Required)")
+	flag.Parse()
+	if err := run(*helpFlag, *rootDirFlag); err != nil {
+		os.Exit(1)
 	}
 }
 
@@ -59,12 +63,26 @@ func printHelp() {
 }
 
 func GenerateMetadata(root string) error {
+	// Check if the directory is readable
+	if _, err := os.Stat(root); err != nil {
+		return fmt.Errorf("unable to access directory: %v", err)
+	}
+
 	packageBuffers := make(map[string]*bytes.Buffer)
 	codeAddedInDir := make(map[string]bool)
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil || strings.HasSuffix(path, "_test.go") || !strings.HasSuffix(path, ".go") {
+		if err != nil {
+			// If we can't stat the file or directory, return the error
+			return fmt.Errorf("unable to access %s: %v", path, err)
+		}
+		if strings.HasSuffix(path, "_test.go") || !strings.HasSuffix(path, ".go") {
 			return nil
+		}
+
+		// Check if the file is readable
+		if _, err := os.Stat(path); err != nil {
+			return fmt.Errorf("unable to access file %s: %v", path, err)
 		}
 
 		fset := token.NewFileSet()

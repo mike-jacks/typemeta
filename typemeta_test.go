@@ -1,10 +1,14 @@
 package typemeta
 
 import (
+	"bytes"
 	"cmp"
 	"fmt"
+	"io"
+	"os"
 	"reflect"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -87,9 +91,15 @@ func ExampleMust_success() {
 
 }
 func ExampleMust_fail() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("panic")
+		}
+	}()
 	resetRegistry()
 	Register[User]("table", "user")
-	// Output:
+	Must[User]("missing")
+	// Output: panic
 }
 
 func ExampleMustWithLog_success() {
@@ -101,9 +111,17 @@ func ExampleMustWithLog_success() {
 
 }
 func ExampleMustWithLog_fail() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("panic")
+		}
+	}()
 	resetRegistry()
 	Register[User]("table", "user")
+	MustWithLog[User]("missing")
 	// Output:
+	// typemeta: missing metadata key "missing" for type typemeta.User
+	// panic
 }
 
 func ExampleList() {
@@ -156,4 +174,40 @@ func Benchmark_List(b *testing.B) {
 	for b.Loop() {
 		List()
 	}
+}
+
+func TestMust_panicsOnMissingKey(t *testing.T) {
+	resetRegistry()
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Must did not panic on missing key")
+		}
+	}()
+	Must[User]("missing")
+}
+
+func TestMustWithLog_panicsOnMissingKeyAndLogs(t *testing.T) {
+	resetRegistry()
+	// Capture stdout
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	defer func() {
+		os.Stdout = old
+	}()
+	defer func() {
+		w.Close()
+	}()
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("MustWithLog did not panic on missing key")
+		}
+		w.Close()
+		var buf bytes.Buffer
+		io.Copy(&buf, r)
+		if !strings.Contains(buf.String(), "typemeta: missing metadata key") {
+			t.Errorf("Expected log output for missing key, got: %s", buf.String())
+		}
+	}()
+	MustWithLog[User]("missing")
 }
